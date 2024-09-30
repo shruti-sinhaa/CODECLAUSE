@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Background Generator</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f2f7b7;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .container {
+        background-color: #a4f68d;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        width: 80%;
+        max-width: 600px;
+      }
+
+      h1,
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 15px;
+      }
+
+      .color-controls,
+      .gradient-controls,
+      .buttons {
+        flex: 1 1 calc(50% - 30px);
+        margin-bottom: 10px;
+      }
+
+      label {
+        margin-right: 10px;
+        font-weight: bold;
+      }
+
+      input[type="color"] {
+        margin-right: 10px;
+        width: 40px;
+        height: 40px;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: box-shadow 0.3s;
+      }
+
+      input[type="color"]:hover {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      input[type="range"] {
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      #angleValue {
+        font-weight: bold;
+      }
+
+      button {
+        background-color: #007bff;
+        color: rgb(255, 255, 255);
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      button i {
+        font-size: 1em;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      .background-preview {
+        height: 200px;
+        border-radius: 10px;
+        border: 2px solid #f59f9f;
+        margin-bottom: 25px;
+      }
+
+      pre {
+        background-color: #fbb2b2;
+        padding: 10px;
+        border-radius: 5px;
+        overflow-x: auto;
+        font-family: "Courier New", Courier, monospace;
+      }
+
+      #copyCSS {
+        display: inline-block;
+        margin-top: 10px;
+        background-color: #28a745;
+      }
+
+      #copyCSS:hover {
+        background-color: #218838;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Advanced Background Generator</h1>
+
+      <div class="controls">
+        <div class="color-controls">
+          <label for="color1">Color 1:</label>
+          <input type="color" id="color1" value="#ff0000" />
+          <label for="color2">Color 2:</label>
+          <input type="color" id="color2" value="#0000ff" />
+          <button id="addColor"><i class="fas fa-plus"></i> Add Color</button>
+        </div>
+
+        <div class="gradient-controls">
+          <label for="gradientType">Gradient Type:</label>
+          <select id="gradientType">
+            <option value="linear">Linear</option>
+            <option value="radial">Radial</option>
+          </select>
+
+          <label for="angleControl">Angle:</label>
+          <input type="range" id="angleControl" min="0" max="360" value="90" />
+          <span id="angleValue">90°</span>
+        </div>
+
+        <div class="buttons">
+          <button id="randomGradient">
+            <i class="fas fa-random"></i> Randomize
+          </button>
+          <button id="saveGradient">
+            <i class="fas fa-save"></i> Save Gradient
+          </button>
+        </div>
+      </div>
+
+      <h2>Background Preview:</h2>
+      <div id="backgroundPreview" class="background-preview"></div>
+
+      <h2>Generated CSS:</h2>
+      <pre id="cssCode"></pre>
+      <button id="copyCSS"><i class="fas fa-copy"></i> Copy CSS</button>
+    </div>
+
+    <script>
+      // script.js
+
+      // Initialize an array to hold gradient colors
+      let colors = ["#ff0000", "#0000ff"];
+
+      function setGradient() {
+        const gradientType = document.getElementById("gradientType").value;
+        const angle = document.getElementById("angleControl").value;
+        const angleText = gradientType === "linear" ? `${angle}deg, ` : "";
+
+        const gradientCSS = `${gradientType}-gradient(${angleText}${colors.join(
+          ", "
+        )})`;
+
+        // Update background preview
+        const backgroundPreview = document.getElementById("backgroundPreview");
+        backgroundPreview.style.background = gradientCSS;
+
+        // Update the CSS code preview
+        document.getElementById(
+          "cssCode"
+        ).textContent = `background: ${gradientCSS};`;
+      }
+
+      function updateAngle() {
+        const angleValue = document.getElementById("angleControl").value;
+        document.getElementById("angleValue").textContent = `${angleValue}°`;
+        setGradient();
+      }
+
+      function addColor() {
+        const newColor = "#ffffff"; // Default color for new additions
+        colors.push(newColor);
+        renderColorInputs();
+        setGradient();
+      }
+
+      function removeColor(index) {
+        colors.splice(index, 1);
+        renderColorInputs();
+        setGradient();
+      }
+
+      function updateColor(index, color) {
+        colors[index] = color;
+        setGradient();
+      }
+
+      function renderColorInputs() {
+        const colorControls = document.querySelector(".color-controls");
+        colorControls.innerHTML =
+          colors
+            .map(
+              (color, index) => `
+        <label for="color${index + 1}">Color ${index + 1}:</label>
+        <input type="color" id="color${
+          index + 1
+        }" value="${color}" onchange="updateColor(${index}, this.value)">
+        ${
+          colors.length > 2
+            ? `<button class="remove-color" onclick="removeColor(${index})"><i class="fas fa-minus"></i></button>`
+            : ""
+        }
+    `
+            )
+            .join("") +
+          '<button id="addColor" onclick="addColor()"><i class="fas fa-plus"></i> Add Color</button>';
+      }
+
+      function randomizeGradient() {
+        colors = colors.map(
+          () =>
+            `#${Math.floor(Math.random() * 16777215)
+              .toString(16)
+              .padStart(6, "0")}`
+        );
+        renderColorInputs();
+        setGradient();
+      }
+
+      function copyCSSToClipboard() {
+        const cssCode = document.getElementById("cssCode").textContent;
+        navigator.clipboard.writeText(cssCode).then(() => {
+          alert("CSS code copied to clipboard!");
+        });
+      }
+
+      // Attach event listeners
+      document
+        .getElementById("gradientType")
+        .addEventListener("change", setGradient);
+      document
+        .getElementById("angleControl")
+        .addEventListener("input", updateAngle);
+      document
+        .getElementById("randomGradient")
+        .addEventListener("click", randomizeGradient);
+      document
+        .getElementById("copyCSS")
+        .addEventListener("click", copyCSSToClipboard);
+
+      // Initial render
+      renderColorInputs();
+      setGradient();
+    </script>
+  </body>
+</html>
